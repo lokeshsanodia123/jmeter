@@ -9,7 +9,7 @@ trigger:
 - master
 
 pool:
-  vmImage: 'windows 10'
+  vmImage: 'ubuntu latest'
 
 steps:
 - task: Ant@1
