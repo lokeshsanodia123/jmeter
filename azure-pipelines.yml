@@ -1,29 +1,7 @@
-# Ant
-- task: ArchiveFiles@2- task: CmdLine@2
-  inputs
-# Build your Java projects and run tests with Apache Ant.
-# Add steps that save build artifacts and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/java
-
-trigger:
-- master
-
-pool:
-  vmImage: 'window'
-
-steps:
 - task: Ant@1
   inputs:
-    workingDirectory: ''
     buildFile: 'build.xml'
-    javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.8'
-    jdkArchitectureOption: 'x64'
+    options: 
     publishJUnitResults: true
     testResultsFiles: '**/TEST-*.xml'
-- task: CmdLine@2
-  inputs:
-   script: 'jmeter -n -t JPetStore_2test1.jmx -l loadtest.jtl -e -o aajaresult'
-    archiveType: 'zip'
-    archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
-    replaceExistingArchive: true
+    javaHomeOption: 'JDKVersion'
