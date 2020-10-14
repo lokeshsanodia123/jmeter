@@ -1,3 +1,29 @@
+path id=”ant.jmeter.classpath”>
+<fileset dir=” D:\a\1\s ” >
+<include name=”ant-jmeter-1.1.1.jar”/>
+</fileset>
+</path>
+<taskdef name=”jmeter” classname=”org.programmerplanet.ant.taskdefs.jmeter.JMeterTask” classpathref=”ant.jmeter.classpath” />
+<target name=”clean”>
+        <delete dir=”results”/>
+        <delete file=”jmeter.log”/>
+         <mkdir dir=”results/jtl”/>
+         <mkdir dir=”results/html”/>
+</target>
+<target name=”test” depends=”clean”>
+    <jmeter jmeterhome=”${jmeter.home}” resultlogdir=”results/jtl”>
+                <testplans dir=”${basedir}” includes=”CreateOrder.jmx”/>
+                <property name=”jmeter.save.saveservice.output_format” value=”xml”/>
+                <jvmarg value=”-Xmx1536m”/>
+    </jmeter>
+</target>
+<target name=”report” depends=”test”>
+             <xslt basedir=”results/jtl” destdir=”results/html” includes=”*.jtl” style=”${basedir}\jmeter-results-detail-report_21.xsl”/>   
+
+</target>
+<target name=”unit” depends=”test”>
+            <xslt basedir=”results/jtl” destdir=”results/unit” includes=”*.jtl” extension=”.xml” style=”${basedir}\jmeterUnitReport.xsl” />
+</target>
 - task: Ant@1
   inputs:
     buildFile: 'build.xml'
@@ -5,3 +31,35 @@
     publishJUnitResults: true
     testResultsFiles: '**/TEST-*.xml'
     javaHomeOption: 'JDKVersion'
+     task: CmdLine@2
+  displayName: Prepare test results
+  inputs:
+    script: |
+      cd D:\a\1\s\results\html
+      dir
+      powershell -command “\”$(Get-    Content Create_Customer.html)\” > report.html”
+      – task: FileContenttoVariable@2
+  displayName: Set test results as variable
+  inputs:
+    FilePath: ‘D:\a\1\s\results\html\report.html’
+    VariableName: ‘html’
+    AddNewlines: false
+    task: PublishTestResults@2
+  displayName: Publish JMeter test results
+  inputs:
+    testResultsFormat: ‘JUnit’
+    testResultsFiles: ‘results/unit/Create_Customer.xml’
+    testRunTitle: ‘Create Customer’
+    task: SendEmail@1
+  inputs:
+    To: ‘marko@churlinoski.mk’
+    From: ‘azure-devops@churlinoski.mk’
+    Subject: ‘JMeter test results’
+    Body: ‘$(html)’
+    BodyAsHtml: true
+    AddAttachment: false
+    SmtpServer: ‘mail.churlinoski.mk’
+    SmtpPort: ’25’
+    SmtpUsername: ‘azure-devops@churlinoski.mk’
+    SmtpPassword: ”
+    UseSSL: false
